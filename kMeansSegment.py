@@ -50,7 +50,7 @@ new_customer_t = pd.DataFrame(new_customer_t)
 
 # CHECKING K BY ELBOW METHOD
 # elbowMethod.showElbow(new_customer_t, 1, 11)
-showSilhouetteScore(new_customer_t, 2, 3 )
+showSilhouetteScore(new_customer_t, 3, 6)
 
 # # APPLYING KMEANS
 # model = KMeans(n_clusters=8, random_state=42)
