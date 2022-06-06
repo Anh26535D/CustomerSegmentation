@@ -1,9 +1,9 @@
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
-def showElbow(data):
+def showElbow(data, lower_, upper_):
     sse = {}
-    for k in range(1,11):
+    for k in range(lower_,upper_):
         kmeans = KMeans(n_clusters=k, random_state=42)
         kmeans.fit(data)
         sse[k] = kmeans.inertia_

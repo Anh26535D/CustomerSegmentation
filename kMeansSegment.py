@@ -6,7 +6,8 @@ from sklearn.preprocessing import OrdinalEncoder
 from scipy import stats
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
-import elbowMethod
+import ElbowMethod
+from SilhouetteScore import showSilhouetteScore
 # READ DATA
 customers = pd.read_csv('./train.csv', sep=';')
 # DATA PRE-TRANSFORMATION
@@ -48,32 +49,33 @@ new_customer_t = scaler.transform(new_customer)
 new_customer_t = pd.DataFrame(new_customer_t)
 
 # CHECKING K BY ELBOW METHOD
-# elbowMethod.showElbow(new_customer_t)
+# elbowMethod.showElbow(new_customer_t, 1, 11)
+showSilhouetteScore(new_customer_t, 2, 3 )
 
-# APPLYING KMEANS
-model = KMeans(n_clusters=8, random_state=42)
-model.fit(new_customer_t)
-customer['label'] = model.labels_
+# # APPLYING KMEANS
+# model = KMeans(n_clusters=8, random_state=42)
+# model.fit(new_customer_t)
+# customer['label'] = model.labels_
 
-#UNDERSTANDING DATA
-segment_customer = customer.groupby('label').agg({
-    'age': 'mean',
-    'job': lambda x: x.mode(),
-    'marital': lambda x: x.mode(),
-    'education': lambda x: x.mode(),
-    'default': 'mean',
-    'balance': 'mean',
-    'housing': 'mean',
-    'loan': 'mean',
-    'contact': lambda x: x.mode(),
-    'day': 'mean',
-    'duration': 'mean',
-    'campaign': 'mean',
-    'pdays': 'mean',
-    'previous': 'mean',
-    'poutcome': 'mean',
-    'term_deposit': 'mean'
-})
+# #UNDERSTANDING DATA
+# segment_customer = customer.groupby('label').agg({
+#     'age': 'mean',
+#     'job': lambda x: x.mode(),
+#     'marital': lambda x: x.mode(),
+#     'education': lambda x: x.mode(),
+#     'default': 'mean',
+#     'balance': 'mean',
+#     'housing': 'mean',
+#     'loan': 'mean',
+#     'contact': lambda x: x.mode(),
+#     'day': 'mean',
+#     'duration': 'mean',
+#     'campaign': 'mean',
+#     'pdays': 'mean',
+#     'previous': 'mean',
+#     'poutcome': 'mean',
+#     'term_deposit': 'mean'
+# })
 
-#DISPLAY DATAFRAME
-print(segment_customer.head(10))
+# #DISPLAY DATAFRAME
+# print(segment_customer.head(10))
