@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import OrdinalEncoder
 from scipy import stats
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.cluster import KMeans
-import ElbowMethod
+from ElbowMethod import showElbow
 from SilhouetteScore import showSilhouetteScore
 # READ DATA
 customers = pd.read_csv('./train.csv', sep=';')
@@ -20,21 +20,30 @@ customers['day'] = pd.to_datetime(customers['day'], format='%Y%m%d').astype(np.i
 max_day = customers['day'].max()
 customers['day'] = (max_day - customers['day'])/(1000000000*86400) + 1
 
-
 # CREATE DATAFRAME CLONE
 customer = customers.copy()
 # ENCODING CATEGORICAL DATA
-enc_ = {'yes':1, 'no':0, 'unknown':0, 'failure':1, 'success':1, 'other':0}
+enc_ = {'yes':1, 'no':0, 'unknown':0, 'failure':-1, 'success':1, 'other':0}
 customer['default'] = customer['default'].map(enc_)
 customer['housing'] = customer['housing'].map(enc_)
 customer['loan'] = customer['loan'].map(enc_)
 customer['term_deposit'] = customer['term_deposit'].map(enc_)
 customer['poutcome'] = customer['poutcome'].map(enc_)
 
+# TEST MIXING FEATURE
+customer['using_service'] = (customer['default'] + customer['housing'] + customer['loan'] + customer['term_deposit'])/(4)
+customer.drop(['default', 'housing', 'loan', 'term_deposit'], axis=1, inplace=True)
+customer['pcontact'] = customer['previous'].apply(
+    lambda x: 0. if (x==0) else 1.0 
+)
+customer.drop(['previous', 'pdays'], axis=1, inplace=True)
+
 customer_get_dummies = pd.get_dummies(customer[['job','marital','education','contact']])
 new_customer = customer.copy()
 new_customer = customer.join(customer_get_dummies)
 new_customer.drop(['job','marital','education','contact'], axis=1, inplace=True)
+
+
 
 # STANDARDLIZE AND SCALE DATA
 new_customer['age'] = stats.boxcox(customer['age'])[0]
@@ -42,17 +51,18 @@ new_customer['balance'] = pd.Series(np.cbrt(customer['balance'])).values
 new_customer['day'] = stats.boxcox(customer['day'])[0]
 new_customer['duration'] = pd.Series(np.cbrt(customer['duration'])).values
 new_customer['campaign'] = stats.boxcox(customer['campaign'])[0]
-new_customer['pdays'] = pd.Series(np.cbrt(customer['pdays'])).values
-new_customer['previous'] = pd.Series(np.cbrt(customer['previous'])).values
+# new_customer['pdays'] = pd.Series(np.cbrt(customer['pdays'])).values
+# new_customer['previous'] = pd.Series(np.cbrt(customer['previous'])).values
 
-scaler = StandardScaler()
-scaler.fit(new_customer)
-new_customer_t = scaler.transform(new_customer)
+# scaler = StandardScaler()
+scaler = MinMaxScaler()
+# scaler.fit(new_customer)
+new_customer_t = scaler.fit_transform(new_customer)
 new_customer_t = pd.DataFrame(new_customer_t)
 
 # CHECKING K BY ELBOW METHOD
-# elbowMethod.showElbow(new_customer_t, 1, 11)
-# showSilhouetteScore(new_customer_t, 2, 8)
+showElbow(new_customer_t, 1, 11)
+# showSilhouetteScore(new_customer_t, 2, 5)
 
 # # APPLYING KMEANS
 # model = KMeans(n_clusters=8, random_state=42)
@@ -81,4 +91,6 @@ new_customer_t = pd.DataFrame(new_customer_t)
 
 # #DISPLAY DATAFRAME
 # print(segment_customer.head(10))
-print(len(customer[customer['day']==0]))
+# print(customer.head(10))
+# customer['previous'].hist(bins=50, figsize=(10,10))
+# plt.show()
