@@ -1,2 +1,2 @@
-# CustomerSegmentation
+# CustomerSegmentation by K-means
  
